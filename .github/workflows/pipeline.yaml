@@ -5,6 +5,9 @@ on:
         branches: [ master ]
     pull_request:
 
+env:
+    PHP_VERSION: 8.2
+
 jobs:
 
     build-macos:
@@ -16,7 +19,7 @@ jobs:
                 with:
                     repack_os: darwin
                     compile_os: macos
-                    php: 8.3
+                    php: ${{ env.PHP_VERSION }}
 
     build-linux:
         name: Build Linux
@@ -27,7 +30,7 @@ jobs:
                 with:
                     repack_os: linux
                     compile_os: linux
-                    php: 8.3
+                    php: ${{ env.PHP_VERSION }}
 
     create-plugin:
         name: Create plugin and install it
@@ -37,7 +40,7 @@ jobs:
             -   name: Setup PHP
                 uses: shivammathur/setup-php@v2
                 with:
-                    php-version: 8.3
+                    php-version: ${{ env.PHP_VERSION }}
                     extensions: gd, intl, json
                     ini-values: date.timezone=UTC
                     tools: symfony-cli
@@ -45,13 +48,17 @@ jobs:
                 uses: actions/download-artifact@v2
                 with:
                     name: plugin-maker.linux
-                    path: ./
+                    path: ./bin
+            -   run: chmod +x bin/plugin-maker
+                shell: bash
             -   name: Create a plugin
-                run: SyliusPluginMaker/plugin-maker.linux create --no-interaction "Sylius Bazinga Plugin"
+                run: ./bin/plugin-maker create --no-interaction "Sylius Bazinga Plugin"
                 shell: bash
             -   name: Install the plugin
                 working-directory: ./SyliusBazingaPlugin
                 run: make install
+            -   uses: lhotari/action-upterm@v1
+                if: failure()
 
     release-artifacts:
         name: Release artifacts

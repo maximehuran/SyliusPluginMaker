@@ -6,7 +6,7 @@ services:
 
     {{ pluginNamespace }}\:
         resource: '../../*'
-        exclude: '../../{Entity,Migrations}'
+        exclude: '../../{Entity{% if hasMigrations %},Migrations{% endif %}}'
 
     {{ pluginNamespace }}\Controller\:
         resource: '../../Controller'

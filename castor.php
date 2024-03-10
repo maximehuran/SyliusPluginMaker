@@ -41,6 +41,7 @@ function create(
         'defaultPhpVersion' => io()->ask('What is the default PHP version of your plugin?', '8.2'),
         'extensionName' => str_replace('Plugin', 'Extension', $pluginPascalCaseFullName),
         'extensionAlias' => io()->ask('What is the alias of your extension?', 'monsieurbiz_' . strtr($pluginSnakeCaseName, ['_plugin' => '', 'sylius_' => ''])),
+        'hasMigrations' => io()->confirm('Does your plugin have (or will have) migrations?', false),
     ];
 
     io()->writeln('Let\'s create your plugin now!');
@@ -90,6 +91,11 @@ function createPluginsFromVars(object $vars): void
             fs()->copy($file->getPathname(), $vars->pluginPascalCaseName . '/' . $formatFilename($file->getRelativePathname()));
         }
         io()->progressAdvance();
+    }
+
+    // No Migrations
+    if (!$vars->hasMigrations) {
+        fs()->remove($vars->pluginPascalCaseName . '/src/Migrations');
     }
 
     // Last but not least, create the license
